@@ -3,19 +3,9 @@
 
 # Server
 
-## Install Server
-
-```
-pip3.9 install fastapi httpx openai matplotlib uvicorn requests pandas openpyxl
-```
-
 ## Run Server
 
+Will run both the compilation of the typescript into js and also load the fastAPI server 
 ```
-python3.9 -m uvicorn main:app --reload
+npm run start
 ```
-
-# Client
-
-Install Live Server and open index.html in live server
-
