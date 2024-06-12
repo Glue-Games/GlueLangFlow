@@ -1,4 +1,4 @@
-from benchmark.settings.modelsConfig import OPENAI_API_KEY
+from serverAILibrary.settings.modelsConfig import OPENAI_API_KEY
 from openai import OpenAI
 
 class OpenAIBaseModel:

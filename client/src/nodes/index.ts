@@ -11,7 +11,7 @@ const fullModels: Omit<InputNodeProps, 'register'>[] = [
   {
     title: 'Level Caption Generator',
     description: "produce the level captions based on data",
-    placeholder: 'TBD',
+    placeholder: 'Finger-licking good,Eat your heart out,Bite-sized,Cherry-pick,Cool beans,Easy as pie,Half-baked,In a jam,Nutty as a fruitcake,Spicy,Sugar rush,Sweet tooth,Baked to perfection,Soup to nuts,Too many cooks spoil the broth,Crying over spilled milk,Have your cake and eat it too,Taking candy from a baby,Like two peas in a pod,Pie in the sky',
     hasTextArea: true
 
   },

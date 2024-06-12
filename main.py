@@ -1,13 +1,11 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from httpx import AsyncClient
+import asyncio
+from serverAILibrary.AIInterface import AIInterface
 
 import logging
-from serverLogic.chatgpt import get_chat_gpt_response, get_chat_gpt_prompt
-from serverLogic.openai_endpoint import get_create_image
-from serverLogic.goapi_endpoint import get_midjourney_image
 import uvicorn
 
 logger = logging.getLogger("uvicorn")
@@ -22,10 +20,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+ai_interface = None
+
 app.mount("/static", StaticFiles(directory="./client/dist",html = True), name="static")
 
 @app.post("/generate-text/")
 async def pipeline(request: Request):
+    global ai_interface
     try:
         context = await request.json()
 
@@ -36,8 +37,8 @@ async def pipeline(request: Request):
         print(context)
         print("----------------------------------------------------------------")
 
-        # Log the received data for debugging purposes
-        logger.info(f"Received data: {context}")
+        ai_interface = AIInterface(context)
+
         # Add your processing logic here
         return {"message": "Data received successfully", "data": context}
         # Call the ChatGPT API to generate the response
@@ -48,3 +49,16 @@ async def pipeline(request: Request):
     except Exception as e:
         logger.error(str(e))
         return JSONResponse(content={"error": str(e)}, status_code=500)
+    
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    global ai_interface
+    await websocket.accept()
+
+    if ai_interface:
+        for step, data in enumerate(ai_interface.run_pipeline()):
+            await websocket.send_text(f"Processing step: {step} data: {data}")
+
+    await websocket.send_text("Pipeline completed!")
+    await websocket.close()

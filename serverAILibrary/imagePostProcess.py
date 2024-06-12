@@ -29,7 +29,7 @@ def convert_to_bytes_io(img):
     img_byte_arr = img_byte_arr.getvalue()
     return img_byte_arr
 
-def get_shrinked_image(image_path, save_middle_path):
+def get_shrinked_image(image_path, save_middle_path=None):
     basewidth = 512
     img = Image.open(image_path)
     wpercent = (basewidth / float(img.size[0]))
@@ -42,7 +42,8 @@ def get_shrinked_image(image_path, save_middle_path):
     maskedImage = Image.new('RGBA', (1024, 1024), (255, 0, 0, 0))
     maskedImage.paste(img, (256, 0), img_mask)
 
-    maskedImage.save(save_middle_path, format='PNG')
+    if save_middle_path:
+        maskedImage.save(save_middle_path, format='PNG')
 
     return convert_to_bytes_io(maskedImage)
 
@@ -58,24 +59,3 @@ def run_picture_to_level_pipeline(pictures_folder, levels_folder, middle_output_
         logger.info(f"Image Successful! saving image to: {image_dest}")
         with open(image_dest, 'wb') as outfile:
             outfile.write(r.content)
-
-
-if __name__ == "__main__":
-    timestr = time.strftime("test_results_%Y%m%d_%H%M%S")
-    result_path = Path(f"./complete_levels/{timestr}")
-    if not os.path.isdir(result_path):
-        os.mkdir(result_path)
-
-    logger.info(f"Test: {result_path}")
-    output_doc = Path.joinpath(result_path, "results.xlsx")
-    if output_doc.is_file():
-        raise Exception(f"Cannot override existing results.xlsx! (path: {output_doc})")
-    
-    FileOutputHandler = logging.FileHandler(Path.joinpath(result_path, "test_log.log"))
-    logger.addHandler(FileOutputHandler)
-
-    pictures_folder = Path("./benchmark/results/test_results_20240415_090501/OpenAIPromptModel/OpenAIImageModel")
-    middle_output_dir = Path.joinpath(result_path, "middle_pictures")
-    if not os.path.isdir(middle_output_dir):
-        os.mkdir(middle_output_dir)
-    run_picture_to_level_pipeline(pictures_folder, result_path, middle_output_dir)

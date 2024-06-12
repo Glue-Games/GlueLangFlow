@@ -1,4 +1,4 @@
-from benchmark.settings.modelsConfig import GOAPI_X_KEY
+from serverAILibrary.settings.modelsConfig import GOAPI_X_KEY
 import time
 import logging
 import requests

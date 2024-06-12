@@ -1,5 +1,5 @@
-from benchmark.settings.modelsConfig import OPENAI_PROMPT_MODEL_THEME
-from benchmark.models.baseModels.openaiBase import openai_base_model
+from serverAILibrary.settings.modelsConfig import OPENAI_PROMPT_MODEL_THEME
+from serverAILibrary.models.baseModels.openaiBase import openai_base_model
 import logging
 
 logger = logging.getLogger(__name__)

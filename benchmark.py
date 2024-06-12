@@ -1,8 +1,8 @@
-from benchmark.settings.levelConfigs import LEVEL_CAPTIONS, NEW_LEVEL_CAPTIONS_BY_CATEGORY
+from serverAILibrary.settings.levelConfigs import LEVEL_CAPTIONS, NEW_LEVEL_CAPTIONS_BY_CATEGORY
 
-from benchmark.models.promptModels.openaiPromptModel import openai_prompt_model
-from benchmark.models.imageModels.openaiImageModel import openai_image_model
-from benchmark.models.imageModels.midjourneyImageModel import midjourney_image_model
+from serverAILibrary.models.promptModels.openaiPromptModel import openai_prompt_model
+from serverAILibrary.models.imageModels.openaiImageModel import openai_image_model
+from serverAILibrary.models.imageModels.midjourneyImageModel import midjourney_image_model
 
 from urllib.request import urlretrieve
 import logging

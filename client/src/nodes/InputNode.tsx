@@ -16,7 +16,7 @@ export function InputNode({ data: {register, ...data} }: NodeProps<InputNodeProp
             <h2 style={{margin: "0"}}>{data.title}</h2>
             <p>{data.description}</p>
             {data.hasTextArea && <textarea
-                // placeholder={data.placeholder}
+                placeholder={data.placeholder}
                 value={data.placeholder}
                 {...register(data.title)}
                 style={{ width: '100%', height: '50%', marginTop: 'auto',  resize: 'none' }}></textarea>}
