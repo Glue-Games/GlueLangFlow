@@ -7,15 +7,18 @@ from io import BytesIO
 
 class AIInterface:
     def __init__(self, context) -> None:
+
+        # TODO: add default/empty values
         self.context = context
-        self.prompt_context = context['Caption to Image Prompt']
-        self.full_level_context = context['Background Generator']
+        
+        self.prompt_context = context['context-2']
+        self.full_level_context = context['inputs-5']
 
         # TODO: change to input from pipelien
-        self.level_caption = context['Level Caption Generator'].split(",")[0]
+        self.level_caption_inputs = context['inputs-1'].split(",")[0]
 
-    def step_caption_to_image_prompt(self, level_caption):
-        return level_caption, openai_prompt_model.generate_image_prompt(level_caption, context=self.prompt_context)
+    def step_caption_to_image_prompt(self, level_caption_inputs):
+        return level_caption_inputs, openai_prompt_model.generate_image_prompt(level_caption_inputs, context=self.prompt_context)
 
     def step_image_from_prompt(self, image_prompt):
         url = openai_image_model.generate_image(image_prompt)
@@ -29,7 +32,7 @@ class AIInterface:
         return openai_background_model.fill_background_image(img_bytes, context=self.full_level_context)
 
     def run_pipeline(self):
-        _, image_prompt = self.step_caption_to_image_prompt(self.level_caption)
+        _, image_prompt = self.step_caption_to_image_prompt(self.level_caption_inputs)
         yield image_prompt
 
         url, image = self.step_image_from_prompt(image_prompt)

@@ -1,5 +1,6 @@
 import type { OnConnect } from "reactflow";
 import { MagicWandIcon } from '@radix-ui/react-icons';
+import { useEffect } from "react";
 
 import { useCallback } from "react";
 import {
@@ -20,18 +21,25 @@ import { getInitialNodes, nodeTypes } from "./nodes";
 import { edgeTypes, getInitialEdges } from "./edges";
 import { useForm } from "react-hook-form";
 import { processPipeline } from "./interface";
+import useWebSocketHandler from "./interface";
 
 export default function App() {
   const { register, handleSubmit } = useForm();
-  const [nodes, , onNodesChange] = useNodesState(getInitialNodes(register));
+  const [nodes, setNodes, onNodesChange] = useNodesState(getInitialNodes(register));
   const [edges, setEdges, onEdgesChange] = useEdgesState(getInitialEdges(getInitialNodes('')));
   const onSubmit = processPipeline
-  
-  
+
+  const { openWebSocket } = useWebSocketHandler(setNodes);
+
   const onConnect: OnConnect = useCallback(
     (connection) => setEdges((edges) => addEdge(connection, edges)),
     [setEdges]
   );
+
+  // Open WebSocket connection when the component mounts
+  useEffect(() => {
+    openWebSocket();
+  }, [openWebSocket]);
   
   return (
     
