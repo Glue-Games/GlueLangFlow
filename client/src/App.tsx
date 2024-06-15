@@ -1,6 +1,6 @@
 import type { OnConnect } from "reactflow";
 import { MagicWandIcon } from '@radix-ui/react-icons';
-import { useEffect } from "react";
+// import { useEffect } from "react";
 
 import { useCallback } from "react";
 import {
@@ -19,28 +19,26 @@ import "reactflow/dist/style.css";
 
 import { getInitialNodes, nodeTypes } from "./nodes";
 import { edgeTypes, getInitialEdges } from "./edges";
-import { useForm } from "react-hook-form";
-import { processPipeline } from "./interface";
-import useWebSocketHandler from "./interface";
+import { useForm, SubmitHandler } from "react-hook-form";
+import websocketHandler from "./interface";
 
 export default function App() {
   const { register, handleSubmit } = useForm();
   const [nodes, setNodes, onNodesChange] = useNodesState(getInitialNodes(register));
   const [edges, setEdges, onEdgesChange] = useEdgesState(getInitialEdges(getInitialNodes('')));
-  const onSubmit = processPipeline
-
-  const { openWebSocket } = useWebSocketHandler(setNodes);
+  // const onSubmit = websocketHandler.send
 
   const onConnect: OnConnect = useCallback(
     (connection) => setEdges((edges) => addEdge(connection, edges)),
     [setEdges]
   );
-
-  // Open WebSocket connection when the component mounts
-  useEffect(() => {
-    openWebSocket();
-  }, [openWebSocket]);
   
+  websocketHandler.connect(setNodes);
+
+  const onSubmit: SubmitHandler<any> = (data: any) => {
+    websocketHandler.send(data);
+  };
+
   return (
     
     <form onSubmit={handleSubmit(onSubmit)} style={{ height: '100%', 'width': '100%' }}>

@@ -1,52 +1,29 @@
-import { useEffect, useRef, useCallback } from "react";
-
 const SERVER_IP: string = "127.0.0.1";
 
-export async function processPipeline(e: object) {
-  console.log("Input to Model")
-  console.log(e)
-  
-  try {
-    const response = await fetch("http://"+SERVER_IP+":8000/generate-text", {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Request-Method': 'POST',
-    },
-    body: JSON.stringify(e),
-  });
-  
-  // Check if the response is OK (status code 200-299)
-  if (!response.ok) {
-    throw new Error(`HTTP error! Status: ${response.status}`);
-  }
-  
-  // Parse the JSON response
-  const data = await response.json();
-  
-  // Print the JSON object
-  console.log('Response JSON:', data);
-} catch (error: any) {
-  // Handle errors
-  console.error('Error:', error.message);
-}
+interface WebSocketHandler {
+  socket: WebSocket | null;
+  setNodes: React.Dispatch<React.SetStateAction<any[]>>;
+  connect: (setNodes: React.Dispatch<React.SetStateAction<any[]>>) => void;
+  send: (data: any) => void;
+  close: () => void;
 }
 
-const useWebSocketHandler = (setNodes: React.Dispatch<React.SetStateAction<any[]>>) => {
-  const socketRef = useRef<WebSocket | null>(null);
+const websocketHandler: WebSocketHandler = {
+  socket: null,
+  setNodes: ()=>{},
 
-  const openWebSocket = useCallback(() => {
-    const socket = new WebSocket("ws://"+SERVER_IP+":8000/ws");
+  connect(setNodes: React.Dispatch<React.SetStateAction<any[]>>) {
+    this.setNodes = setNodes
+    this.socket = new WebSocket("ws://"+SERVER_IP+":8000/ws");
 
-    socket.onopen = () => {
+    this.socket.onopen = () => {
       console.log('WebSocket connection established');
     };
 
-    socket.onmessage = (event) => {
+    this.socket.onmessage = (event) => {
+      console.log('Message from server:', event.data);
       const data = JSON.parse(event.data);
-      console.log(event);
-
-      setNodes((nodes: any[]) =>
+      this.setNodes((nodes: any[]) =>
         nodes.map((node: any) => {
           if (data.step == node.id) {
             return {
@@ -56,35 +33,96 @@ const useWebSocketHandler = (setNodes: React.Dispatch<React.SetStateAction<any[]
           }
           return node;
         })
-      );
+      )
     };
 
-    socket.onclose = () => {
+    this.socket.onclose = () => {
       console.log('WebSocket connection closed');
     };
 
-    socket.onerror = (error) => {
+    this.socket.onerror = (error) => {
       console.error('WebSocket error:', error);
     };
+  },
 
-    socketRef.current = socket;
-  }, [setNodes]);
-
-  const closeWebSocket = useCallback(() => {
-    if (socketRef.current) {
-      socketRef.current.close();
-      socketRef.current = null; // Ensure the reference is cleared
+  send(data: any) {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify(data));
+    } else {
+      console.error('WebSocket is not open');
     }
-  }, []);
+  },
 
-  useEffect(() => {
-    return () => {
-      // Ensure the WebSocket connection is closed when the component unmounts
-      closeWebSocket();
-    };
-  }, [closeWebSocket]);
-
-  return { openWebSocket, closeWebSocket };
+  close() {
+    if (this.socket) {
+      this.socket.close();
+    }
+  },
 };
 
-export default useWebSocketHandler;
+export default websocketHandler;
+
+
+
+
+// const useWebSocketHandler = (setNodes: React.Dispatch<React.SetStateAction<any[]>>) => {
+//   const socketRef = useRef<WebSocket | null>(null);
+
+//   const openWebSocket = useCallback(() => {
+//     const socket = new WebSocket("ws://"+SERVER_IP+":8000/ws");
+
+//     socket.onopen = () => {
+//       console.log('WebSocket connection established');
+//     };
+
+//     socket.onmessage = (event) => {
+//       const data = JSON.parse(event.data);
+//       console.log(event);
+
+//       setNodes((nodes: any[]) =>
+//         nodes.map((node: any) => {
+//           if (data.step == node.id) {
+//             return {
+//               ...node,
+//               style: { backgroundColor: '#2ecc71' },
+//             };
+//           }
+//           return node;
+//         })
+//       );
+//     };
+
+//     socket.onclose = () => {
+//       console.log('WebSocket connection closed');
+//     };
+
+//     socket.onerror = (error) => {
+//       console.error('WebSocket error:', error);
+//     };
+
+//     socketRef.current = socket;
+//   }, [setNodes]);
+
+//   const onSubmitToSocket = (e: any) => {
+//     socketRef.current?.send(JSON.stringify(e))
+//   }
+
+//   const closeWebSocket = useCallback(() => {
+//     if (socketRef.current) {
+//       console.log('callback closed the websocket');
+//       socketRef.current.close();
+//       socketRef.current = null; // Ensure the reference is cleared
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     return () => {
+//       // Ensure the WebSocket connection is closed when the component unmounts
+//       closeWebSocket();
+//     };
+//   }, [closeWebSocket]);
+
+//   return { openWebSocket, onSubmitToSocket, closeWebSocket };
+// };
+
+// export default useWebSocketHandler;
