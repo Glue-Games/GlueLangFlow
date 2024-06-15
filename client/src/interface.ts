@@ -43,14 +43,15 @@ const useWebSocketHandler = (setNodes: React.Dispatch<React.SetStateAction<any[]
     };
 
     socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
       console.log(event);
 
       setNodes((nodes: any[]) =>
         nodes.map((node: any) => {
-          if (node.id === "test") {
+          if (data.step == node.id) {
             return {
               ...node,
-              style: { backgroundColor: 'green' },
+              style: { backgroundColor: '#2ecc71' },
             };
           }
           return node;

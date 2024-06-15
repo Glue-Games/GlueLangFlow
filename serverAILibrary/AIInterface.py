@@ -27,16 +27,28 @@ class AIInterface:
         image_data = BytesIO(response.content)
         return url, image_data
     
-    def step_picture_to_full_level(self, image):
-        img_bytes = get_shrinked_image(image)
-        return openai_background_model.fill_background_image(img_bytes, context=self.full_level_context)
+    def step_picture_to_full_level(self, processed_image):
+        return openai_background_model.fill_background_image(processed_image, context=self.full_level_context)
 
     def run_pipeline(self):
+        # step 0 - user agent/ trend not implemented currently
+        yield "not implemented"
+
+        # step 1 - generate level caption from trend/user agent not implemented currently
+        yield "not implemented"
+        
+        # step 2 - caption to prompt
         _, image_prompt = self.step_caption_to_image_prompt(self.level_caption_inputs)
         yield image_prompt
 
+        # step 3 - image from prompt
         url, image = self.step_image_from_prompt(image_prompt)
         yield url
 
-        full_level_url = self.step_picture_to_full_level(image)
+        # step 4 - process image to remove background
+        processed_image = get_shrinked_image(image)
+        yield processed_image
+
+        # step 5 - process image and background generation
+        full_level_url = self.step_picture_to_full_level(processed_image)
         yield full_level_url

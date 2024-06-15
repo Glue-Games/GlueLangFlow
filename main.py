@@ -57,8 +57,13 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
 
     if ai_interface:
-        for step, data in enumerate(ai_interface.run_pipeline()):
-            await websocket.send_text(f"Processing step: {step} data: {data}")
+        try:
+            for step, data in enumerate(ai_interface.run_pipeline()):
+                # await websocket.send_text(f"Processing step: {step} data: {data}")
+                await websocket.send_json({"step": step, "data": data})
+        except Exception:
+            await websocket.send_json({"step": -1, "data": "FAILED"})
+            await websocket.close()
 
-    await websocket.send_text("Pipeline completed!")
+    await websocket.send_json({"step": -1, "data": "SUCCESS"})
     await websocket.close()
