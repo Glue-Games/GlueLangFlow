@@ -33,10 +33,8 @@ export default function App() {
     [setEdges]
   );
   
-  websocketHandler.connect(setNodes);
-
   const onSubmit: SubmitHandler<any> = (data: any) => {
-    websocketHandler.send(data);
+    websocketHandler.connect(setNodes, data);
   };
 
   return (

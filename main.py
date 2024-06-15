@@ -62,7 +62,11 @@ async def websocket_endpoint(websocket: WebSocket):
                 for step, data in enumerate(ai_interface.run_pipeline()):
                     # await websocket.send_text(f"Processing step: {step} data: {data}")
                     logger.info("trying to send json on ws")
-                    await websocket.send_json({"step": step, "data": data})
+                    try:
+                        await websocket.send_json({"step": step, "data": json.dumps(data)})
+                    except Exception:
+                        await websocket.send_json({"step": step, "data": data})
+                        
                     logger.info("json sent successfully")
             except Exception as e:
                 logger.error(str(e))

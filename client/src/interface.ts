@@ -3,7 +3,7 @@ const SERVER_IP: string = "127.0.0.1";
 interface WebSocketHandler {
   socket: WebSocket | null;
   setNodes: React.Dispatch<React.SetStateAction<any[]>>;
-  connect: (setNodes: React.Dispatch<React.SetStateAction<any[]>>) => void;
+  connect: (setNodes: React.Dispatch<React.SetStateAction<any[]>>, data: any) => void;
   send: (data: any) => void;
   close: () => void;
 }
@@ -12,12 +12,17 @@ const websocketHandler: WebSocketHandler = {
   socket: null,
   setNodes: ()=>{},
 
-  connect(setNodes: React.Dispatch<React.SetStateAction<any[]>>) {
+  connect(setNodes: React.Dispatch<React.SetStateAction<any[]>>, data: any) {
     this.setNodes = setNodes
     this.socket = new WebSocket("ws://"+SERVER_IP+":8000/ws");
 
     this.socket.onopen = () => {
       console.log('WebSocket connection established');
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        this.socket.send(JSON.stringify(data));
+      } else {
+        console.error('WebSocket is not open');
+      }
     };
 
     this.socket.onmessage = (event) => {
