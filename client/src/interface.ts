@@ -8,6 +8,51 @@ interface WebSocketHandler {
   close: () => void;
 }
 
+function handleData(data: any) {
+  const llist = document.getElementById("main-list")
+      switch(data.step) {
+        case -1:
+          if (data.data == "FAILED") {
+            alert("failed attempt, refresh and try again...")
+          } else {
+            alert("Finished!")
+          }
+          break;
+        case 0: /* Not Implemented */
+          break;
+        case 1: /* Not Implemented */
+          break;
+        case 2: /* Image Prompt output */
+          var imagePromptElement = document.createElement('div')
+          imagePromptElement.innerHTML = `
+          <h4>Image Prompt <h4>
+          <p>${data.data}<p>
+          `
+          llist?.appendChild(imagePromptElement)
+          break;
+          case 3: /* Image URL */
+          var imageUrlElement = document.createElement('div')
+          imageUrlElement.innerHTML = `
+          <h4>Image URL (without background)</h4>
+          <div><a href="${data.data}" download="gen_image.png">link to download</a></div>
+          <img class="image-output" src="${data.data}"></img>
+          `
+          llist?.appendChild(imageUrlElement)
+          break;
+        case 4: /* Algo ran */
+          break;
+        case 5: /* Complete Level */
+          var fullImageUrlElement = document.createElement('div')
+          fullImageUrlElement.innerHTML = `
+          <h4> Full Image URL (with background)</h4>
+          <div><a href="${data.data}" download="full_image.png">link to download</a></div>
+          <img class="image-output" src="${data.data}"></img>
+          `
+          llist?.appendChild(fullImageUrlElement)
+          break;
+      }
+}
+
 const websocketHandler: WebSocketHandler = {
   socket: null,
   setNodes: ()=>{},
@@ -19,6 +64,7 @@ const websocketHandler: WebSocketHandler = {
     this.socket.onopen = () => {
       console.log('WebSocket connection established');
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        console.log(data);
         this.socket.send(JSON.stringify(data));
       } else {
         console.error('WebSocket is not open');
@@ -26,8 +72,9 @@ const websocketHandler: WebSocketHandler = {
     };
 
     this.socket.onmessage = (event) => {
-      console.log('Message from server:', event.data);
       const data = JSON.parse(event.data);
+      console.log('Message from server:', data);
+      
       this.setNodes((nodes: any[]) =>
         nodes.map((node: any) => {
           if (data.step == node.id) {
@@ -39,6 +86,8 @@ const websocketHandler: WebSocketHandler = {
           return node;
         })
       )
+
+      handleData(data)
     };
 
     this.socket.onclose = () => {
@@ -52,6 +101,7 @@ const websocketHandler: WebSocketHandler = {
 
   send(data: any) {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      console.log(JSON.stringify(data));
       this.socket.send(JSON.stringify(data));
     } else {
       console.error('WebSocket is not open');

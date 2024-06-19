@@ -25,6 +25,8 @@ class AIInterface:
         response = requests.get(url)
         response.raise_for_status()  # Ensure the request was successful
         image_data = BytesIO(response.content)
+
+        # save image (response.content) + context for the image
         return url, image_data
     
     def step_picture_to_full_level(self, processed_image):
@@ -42,12 +44,13 @@ class AIInterface:
         yield image_prompt
 
         # step 3 - image from prompt
+        # TODO: override with input-2/3 from context
         url, image = self.step_image_from_prompt(image_prompt)
         yield url
 
         # step 4 - process image to remove background
         processed_image = get_shrinked_image(image)
-        yield processed_image
+        yield "Success Run"
 
         # step 5 - process image and background generation
         full_level_url = self.step_picture_to_full_level(processed_image)

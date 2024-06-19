@@ -23,49 +23,19 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="./client/dist",html = True), name="static")
 
-# @app.post("/generate-text/")
-# async def pipeline(request: Request):
-#     global ai_interface
-#     try:
-#         context = await request.json()
-
-#         if not context:
-#             raise ValueError("Prompt cannot be empty.")
-
-#         print("----------------------------------------------------------------")
-#         print(context)
-#         print("----------------------------------------------------------------")
-
-#         ai_interface = AIInterface(context)
-
-#         # Add your processing logic here
-#         return {"message": "Data received successfully", "data": context}
-#         # Call the ChatGPT API to generate the response
-#         response = get_chat_gpt_prompt(context)
-
-#         return JSONResponse(content=response, status_code=200)
-
-#     except Exception as e:
-#         logger.error(str(e))
-#         return JSONResponse(content={"error": str(e)}, status_code=500)
-    
-
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
             data = await websocket.receive_text()
-            context = json.loads(data)
+            context = json.loads(data) # context => { context-0: "aldsfjalskdf", ..., intput-2: "adsfasdf" }
             ai_interface = AIInterface(context)
             try:
                 for step, data in enumerate(ai_interface.run_pipeline()):
                     # await websocket.send_text(f"Processing step: {step} data: {data}")
-                    logger.info("trying to send json on ws")
-                    try:
-                        await websocket.send_json({"step": step, "data": json.dumps(data)})
-                    except Exception:
-                        await websocket.send_json({"step": step, "data": data})
+                    logger.info(f"step: {step}, data: {data}")
+                    await websocket.send_json({"step": step, "data": data})
                         
                     logger.info("json sent successfully")
             except Exception as e:

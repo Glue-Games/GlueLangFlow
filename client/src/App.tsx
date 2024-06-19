@@ -40,7 +40,7 @@ export default function App() {
   return (
     
     <form onSubmit={handleSubmit(onSubmit)} style={{ height: '100%', 'width': '100%' }}>
-    <div className="main" style={{ height: '100%', 'width': '100%' }}>
+    <div id="main-list" className="main" style={{ height: '100%', 'width': '100%', minHeight: "40rem"}}>
     <button className="button-80 run-button" type='submit' >Run Pipeline</button>
     <ReactFlow
     nodes={nodes}
